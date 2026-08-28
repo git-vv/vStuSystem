@@ -1,0 +1,5 @@
+# 强制将 .c 文件识别为 C++
+*.c linguist-language=C++
+
+# 强制将 .h 头文件识别为 C++
+*.h linguist-language=C++
