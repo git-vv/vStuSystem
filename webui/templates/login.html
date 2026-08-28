@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>星芽教务系统</h1>
+            <p class="subtitle">Xingya Education System</p>
+        </header>
+
+        <div class="section">
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>用户名 <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="login-username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group pwd-field">
+                    <label>密码 <span class="required">*</span></label>
+                    <input type="password" class="form-control" id="login-password" placeholder="请输入密码" required>
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('login-password')">&#128065;</button>
+                </div>
+                <div class="form-error" id="login-error"></div>
+                <button type="submit" class="btn btn-primary btn-block" id="login-btn">登录</button>
+            </form>
+            <div style="margin-top:12px; text-align:center;">
+                <a href="javascript:void(0)" onclick="showResetForm()" style="color:#667eea; font-size:0.9rem;">忘记密码？申请重置</a>
+            </div>
+
+            <!-- Reset request (hidden by default) -->
+            <div id="reset-section" style="display:none; margin-top:16px; padding-top:16px; border-top:1px solid #e2e8f0;">
+                <form id="reset-form" onsubmit="handleResetRequest(event)">
+                    <div class="form-group">
+                        <label>用户名 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="reset-username" placeholder="请输入需要重置密码的用户名" required>
+                    </div>
+                    <div class="form-hint">提交后需管理员审批，审批通过后管理员将为您设置新密码</div>
+                    <div class="form-error" id="reset-error"></div>
+                    <button type="submit" class="btn btn-primary btn-block" id="reset-btn">提交重置申请</button>
+                </form>
+                <div style="margin-top:8px; text-align:center;">
+                    <a href="javascript:void(0)" onclick="hideResetForm()" style="color:#667eea; font-size:0.9rem;">返回登录</a>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动管理 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .activity-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .activity-table th,
+        .activity-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .activity-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #4a5568;
+        }
+        .activity-table td {
+            font-size: 0.9rem;
+        }
+        .activity-cover-thumb {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            image-rendering: -webkit-optimize-contrast;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-published {
+            background: #c6f6d5;
+            color: #276749;
+        }
+        .status-draft {
+            background: #e2e8f0;
+            color: #718096;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .action-btns button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+        .tab-bar {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+        .tab-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #718096;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-item.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .qrcode-section {
+            text-align: center;
+            padding: 20px;
+        }
+        .qrcode-link {
+            margin: 16px 0;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        .sort-handle {
+            cursor: move;
+            color: #a0aec0;
+            user-select: none;
+        }
+        .sort-handle:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>活动管理</h1>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <div class="tab-bar">
+            <div class="tab-item active" onclick="switchTab('manage')">活动管理</div>
+            <div class="tab-item" onclick="switchTab('tools')">工具</div>
+        </div>
+
+        <!-- Tab: Activity Management -->
+        <div class="tab-content active" id="tab-manage">
+            <div class="activity-toolbar">
+                <button class="btn btn-primary" onclick="openCreateModal()">+ 创建活动</button>
+                <button class="btn btn-secondary" onclick="openPromotionModal()">宣传彩页</button>
+                <button class="btn btn-secondary" onclick="openNoticeModal()">活动须知</button>
+                <button class="btn btn-secondary" onclick="openAboutUsModal()">关于我们</button>
+            </div>
+
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">排序</th>
+                        <th style="width:70px;">封面</th>
+                        <th>标题</th>
+                        <th>时间</th>
+                        <th>报名/容量</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="activity-tbody">
+                    <tr><td colspan="7" style="text-align:center; padding:20px;">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab: Tools -->
+        <div class="tab-content" id="tab-tools">
+            <div class="qrcode-section">
+                <h3 style="margin-bottom:12px;">活动页链接</h3>
+                <div class="qrcode-link" id="activity-url">加载中...</div>
+                <button class="btn btn-secondary" onclick="copyActivityUrl()">复制链接</button>
+                <div id="qrcode-container" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Create/Edit Modal -->
+        <div class="modal-overlay" id="activity-modal" onclick="App.hideModal('activity-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="max-width:500px;">
+                <button class="modal-close" onclick="App.hideModal('activity-modal')">&times;</button>
+                <div class="modal-title" id="modal-title">创建活动</div>
+                <form onsubmit="saveActivity(event)">
+                    <input type="hidden" id="activity-id">
+                    <div class="form-group">
+                        <label>标题 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="activity-title" required maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea class="form-control" id="activity-desc" rows="3" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>封面图（可多选）</label>
+                        <input type="file" id="cover-input" accept="image/*" multiple onchange="handleCoverSelect(event)">
+                        <div id="cover-preview-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>加群图片</label>
+                        <input type="file" id="group-input" accept="image/*" onchange="handleGroupSelect(event)">
+                        <img id="group-preview" style="display:none; max-width:200px; margin-top:8px; border-radius:4px;">
+                    </div>
+                    <div class="form-group">
+                        <label>开始时间 <span class="required">*</span></label>
+                        <input type="datetime-local" class="form-control" id="activity-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label>结束时间 <span class="required">*</span></label>
+                        <input type="datetime-local" class="form-control" id="activity-end" required>
+                    </div>
+                    <div class="form-group">
+                        <label>报名截止时间 <span class="required">*</span></label>
+                        <input type="datetime-local" class="form-control" id="activity-deadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label>容量 (0=不限)</label>
+                        <input type="number" class="form-control" id="activity-capacity" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>拼团类型</label>
+                        <select class="form-control" id="activity-group-type" onchange="updateGroupTypeVisibility()">
+                            <option value="0">普通报名</option>
+                            <option value="1">会话拼团（逐个加入）</option>
+                            <option value="2">同步拼团（一次登记所有人）</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="group-size-group" style="display:none;">
+                        <label>拼团人数</label>
+                        <input type="number" class="form-control" id="activity-group-size" min="2" max="50" value="2">
+                    </div>
+                    <div class="form-error" id="activity-error"></div>
+                    <div style="display:flex; gap:12px; justify-content:flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="App.hideModal('activity-modal')">取消</button>
+                        <button type="submit" class="btn btn-primary" id="save-btn">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Signups Modal -->
+        <div class="modal-overlay" id="signups-modal" onclick="App.hideModal('signups-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="max-width:600px;">
+                <button class="modal-close" onclick="App.hideModal('signups-modal')">&times;</button>
+                <div class="modal-title">报名记录</div>
+                <div id="signups-content" style="max-height:400px; overflow-y:auto;">
+                    <table class="activity-table" id="signups-table">
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>手机号</th>
+                                <th>年级</th>
+                                <th>报名类型</th>
+                                <th>拼团</th>
+                                <th>报名时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signups-tbody"></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:16px;">
+                    <button class="btn btn-secondary" onclick="copySignups()">复制全部</button>
+                    <button class="btn btn-primary" onclick="App.hideModal('signups-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotion Modal -->
+        <div class="modal-overlay" id="promotion-modal" onclick="App.hideModal('promotion-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="max-width:500px;">
+                <button class="modal-close" onclick="App.hideModal('promotion-modal')">&times;</button>
+                <div class="modal-title">宣传彩页</div>
+                <div class="form-group">
+                    <label>宣传图片（可多选，拖拽排序）</label>
+                    <input type="file" id="promotion-image-input" accept="image/*" multiple onchange="handlePromotionImageSelect(event)">
+                    <div id="promotion-preview-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>宣传文本</label>
+                    <textarea class="form-control" id="promotion-text" rows="4" maxlength="1000" placeholder="输入宣传文本，留空则不展示"></textarea>
+                </div>
+                <div class="form-error" id="promotion-error"></div>
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="App.hideModal('promotion-modal')">取消</button>
+                    <button type="button" class="btn btn-primary" id="promotion-save-btn" onclick="savePromotion()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notice Modal -->
+        <div class="modal-overlay" id="notice-modal" onclick="App.hideModal('notice-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="max-width:500px;">
+                <button class="modal-close" onclick="App.hideModal('notice-modal')">&times;</button>
+                <div class="modal-title">活动须知</div>
+                <div class="form-group">
+                    <label>须知内容</label>
+                    <textarea class="form-control" id="notice-text" rows="10" maxlength="5000" placeholder="输入活动须知内容，留空则不展示"></textarea>
+                </div>
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="App.hideModal('notice-modal')">取消</button>
+                    <button type="button" class="btn btn-primary" id="notice-save-btn" onclick="saveNotice()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Modal -->
+        <div class="modal-overlay" id="aboutus-modal" onclick="App.hideModal('aboutus-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="max-width:620px;">
+                <button class="modal-close" onclick="App.hideModal('aboutus-modal')">&times;</button>
+                <div class="modal-title">关于我们</div>
+                <div id="aboutus-card-list" style="max-height:55vh; overflow-y:auto; margin-bottom:8px;"></div>
+                <button type="button" class="btn btn-secondary" onclick="addAboutUsCard()" style="width:100%; margin-bottom:8px;">+ 添加卡片</button>
+                <div class="form-error" id="aboutus-error"></div>
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="App.hideModal('aboutus-modal')">取消</button>
+                    <button type="button" class="btn btn-primary" id="aboutus-save-btn" onclick="saveAboutUs()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/qrcode.min.js"></script>
+    <script src="/static/js/activity_manage.js"></script>
+</body>
+</html>

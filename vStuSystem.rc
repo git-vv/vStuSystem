@@ -1,0 +1,9 @@
+/* vStuSystem PE 资源文件
+   - IDI_APPICON: 应用主图标（托盘 + EXE 图标）
+   - 1 24: 应用清单文件（声明 Windows 10/11 兼容性与 Common Controls v6） */
+
+#include "src/resource.h"
+
+IDI_APPICON ICON "packaging\\windows\\vStuSystem.ico"
+
+1 24 "packaging\\windows\\app.manifest"

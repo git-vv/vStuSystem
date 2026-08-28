@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号注册 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>星芽教务系统</h1>
+            <p class="subtitle">Xingya Education System</p>
+        </header>
+
+        <div class="section">
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>用户名 <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="reg-username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group pwd-field">
+                    <label>密码 <span class="required">*</span></label>
+                    <input type="password" class="form-control" id="reg-password" placeholder="请输入密码（至少6位）" required>
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('reg-password')">&#128065;</button>
+                </div>
+                <div class="form-group pwd-field">
+                    <label>确认密码 <span class="required">*</span></label>
+                    <input type="password" class="form-control" id="reg-password2" placeholder="请再次输入密码" required>
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('reg-password2')">&#128065;</button>
+                </div>
+                <div class="form-group">
+                    <label>角色</label>
+                    <select class="form-control" id="reg-role">
+                        <option value="1">教师</option>
+                        <option value="0">管理员</option>
+                    </select>
+                    <div class="form-hint" id="reg-role-hint" style="display:none;">管理员仅允许注册一次</div>
+                </div>
+                <div class="form-error" id="reg-error"></div>
+                <button type="submit" class="btn btn-success btn-block" id="reg-btn">注册</button>
+            </form>
+            <div style="margin-top:12px; text-align:center;">
+                <a href="/login" style="color:#667eea; font-size:0.9rem;">已有账号？去登录</a>
+            </div>
+        </div>
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/register.js"></script>
+</body>
+</html>

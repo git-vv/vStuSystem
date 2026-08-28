@@ -1,0 +1,16 @@
+SQLite Amalgamation Source
+
+Version: 3.46.1
+Source URL: https://www.sqlite.org/2024/sqlite-amalgamation-3460100.zip
+Date Added: 2026-07-28
+Purpose: Statically compiled into vStuSystem Windows build (replaces libsqlite3.so on Linux)
+
+Build Macros (defined in CMakeLists.txt if(WIN32) branch):
+  SQLITE_OS_WIN             - Target Windows platform
+  SQLITE_THREADSAFE=1       - Thread-safe mode (serialized)
+  SQLITE_OMIT_LOAD_EXTENSION - Disable extension loading (security)
+
+Note:
+  This amalgamation source is the same version as 3rd/include/sqlite3/sqlite3.h
+  (header-only distribution used for Linux dynamic link).
+  Do NOT modify the source code. Compile behavior is controlled via macros only.

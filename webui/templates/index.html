@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>星芽教务系统</h1>
+            <p class="subtitle">Xingya Education System</p>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" id="btn-login" onclick="App.navigateTo('/login')">登录</button>
+                <button class="btn-logout" id="btn-logout" onclick="handleLogout()" style="display:none;">退出</button>
+            </div>
+        </header>
+        <div class="card-grid">
+            <div class="card card-registration" onclick="App.navigateTo('/registration')">
+                <div class="card-icon">&#9998;</div>
+                <div class="card-title">报名缴费</div>
+                <div class="card-desc">Registration &amp; Payment</div>
+            </div>
+            <div class="card card-class-create" onclick="App.navigateTo('/class_create')">
+                <div class="card-icon">&#127979;</div>
+                <div class="card-title">创建班级</div>
+                <div class="card-desc">Create Class</div>
+            </div>
+            <div class="card card-class-manage" onclick="App.navigateTo('/class_manage')">
+                <div class="card-icon">&#9881;</div>
+                <div class="card-title">班级管理</div>
+                <div class="card-desc">Class Management</div>
+            </div>
+            <div class="card card-preset" onclick="App.navigateTo('/preset')">
+                <div class="card-icon">&#127991;</div>
+                <div class="card-title">预设管理</div>
+                <div class="card-desc">Price Preset</div>
+            </div>
+            <div class="card card-resource" onclick="App.navigateTo('/resource')">
+                <div class="card-icon">&#128218;</div>
+                <div class="card-title">资源管理</div>
+                <div class="card-desc">Resource Management</div>
+            </div>
+            <div class="card card-admin" onclick="App.navigateTo('/admin')">
+                <div class="card-icon">&#128272;</div>
+                <div class="card-title">超级管理员</div>
+                <div class="card-desc">Super Admin</div>
+            </div>
+            <div class="card card-register" onclick="App.navigateTo('/account')">
+                <div class="card-icon">&#128100;</div>
+                <div class="card-title">账号管理</div>
+                <div class="card-desc">Account Management</div>
+            </div>
+            <div class="card card-api" onclick="App.navigateTo('/api_manage')">
+                <div class="card-icon">&#128268;</div>
+                <div class="card-title">API 管理</div>
+                <div class="card-desc">API Management</div>
+            </div>
+            <div class="card card-data-transfer" onclick="App.navigateTo('/data_transfer')">
+                <div class="card-icon">&#128230;</div>
+                <div class="card-title">数据管理</div>
+                <div class="card-desc">Data Transfer</div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+    <script>
+        (function() {
+            App.apiGet('/api/auth/session').then(function(res) {
+                if (res.status === 200 && res.data.code === 0) {
+                    var session = res.data.data;
+                    var nameEl = document.getElementById('user-name');
+                    if (nameEl) { nameEl.textContent = session.username; }
+                    var logoutBtn = document.getElementById('btn-logout');
+                    if (logoutBtn) { logoutBtn.style.display = ''; }
+                    var loginBtn = document.getElementById('btn-login');
+                    if (loginBtn) { loginBtn.style.display = 'none'; }
+                }
+            }).catch(function() {});
+        })();
+
+        function handleLogout() {
+            App.apiPost('/api/auth/logout', {}).then(function() {
+                window.location.href = '/login';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>API 管理 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .api-list {
+            margin-top: 20px;
+        }
+        .api-item {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .api-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        .api-method {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            color: #fff;
+            vertical-align: middle;
+        }
+        .method-get { background: #48bb78; }
+        .method-post { background: #4299e1; }
+        .api-url {
+            font-size: 14px;
+            color: #4a5568;
+            word-break: break-all;
+            background: #edf2f7;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin: 8px 0;
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .api-url-text {
+            flex: 1;
+            word-break: break-all;
+        }
+        .api-desc {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 6px;
+        }
+        .btn-copy-sm {
+            flex-shrink: 0;
+            padding: 4px 12px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #3182ce;
+            color: #fff;
+            cursor: pointer;
+            min-height: 28px;
+        }
+        .btn-copy-sm:hover { background: #2b6cb0; }
+        .btn-go-sm {
+            flex-shrink: 0;
+            padding: 4px 12px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #48bb78;
+            color: #fff;
+            cursor: pointer;
+            min-height: 28px;
+        }
+        .btn-go-sm:hover { background: #38a169; }
+        .loading-text {
+            text-align: center;
+            color: #a0aec0;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-link" href="/">&#8592; 返回首页</a>
+        <h2 style="text-align:center; margin: 16px 0;">API 管理</h2>
+        <div id="loading" class="loading-text">正在获取网络信息...</div>
+        <div id="api-list" class="api-list" style="display:none;">
+            <div class="api-item">
+                <div class="api-name">凭证页</div>
+                <div class="api-url">
+                    <span class="api-method method-get">GET</span>
+                    <span class="api-url-text" id="url-credential"></span>
+                    <button class="btn-copy-sm" data-target="url-credential">复制</button>
+                    <button class="btn-go-sm" data-href="/credential">跳转</button>
+                </div>
+                <div class="api-desc">获取系统凭证，展示 IP、端口、二维码等信息</div>
+            </div>
+            <div class="api-item">
+                <div class="api-name">活动页</div>
+                <div class="api-url">
+                    <span class="api-method method-get">GET</span>
+                    <span class="api-url-text" id="url-activity"></span>
+                    <button class="btn-copy-sm" data-target="url-activity">复制</button>
+                    <button class="btn-go-sm" id="go-activity">跳转</button>
+                </div>
+                <div class="api-desc">公开活动报名页面，无需登录即可访问（端口 8000）</div>
+            </div>
+            <div class="api-item">
+                <div class="api-name">创建活动页面</div>
+                <div class="api-url">
+                    <span class="api-method method-get">GET</span>
+                    <span class="api-url-text" id="url-activity-manage"></span>
+                    <button class="btn-copy-sm" data-target="url-activity-manage">复制</button>
+                    <button class="btn-go-sm" data-href="/activity_manage">跳转</button>
+                </div>
+                <div class="api-desc">活动管理页面，可直接创建、编辑、发布活动</div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+    <script>
+    (function() {
+        App.requireLogin(function() {
+            fetchNetworkInfo();
+        }, 0);
+
+        function fetchNetworkInfo() {
+            App.apiGet('/api/network/info').then(function(res) {
+                document.getElementById('loading').style.display = 'none';
+                if (res.data.code === 0 && res.data.data && res.data.data.ipv4) {
+                    var d = res.data.data;
+                    var host = (d.domain || d.ipv4) + ':' + (d.port || 18080);
+                    var baseUrl = window.location.protocol + '//' + host;
+                    var activityHost = (d.domain || d.ipv4) + ':8000';
+                    var activityUrl = window.location.protocol + '//' + activityHost + '/activity';
+
+                    document.getElementById('url-credential').textContent = baseUrl + '/credential';
+                    document.getElementById('url-activity').textContent = activityUrl;
+                    document.getElementById('go-activity').setAttribute('data-href', activityUrl);
+                    document.getElementById('url-activity-manage').textContent = baseUrl + '/activity_manage';
+                    document.getElementById('api-list').style.display = 'block';
+                } else {
+                    document.getElementById('loading').textContent = '无法获取网络信息';
+                }
+            }).catch(function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loading').textContent = '网络错误';
+            });
+        }
+
+        document.getElementById('api-list').addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-copy-sm')) {
+                var targetId = e.target.getAttribute('data-target');
+                var text = document.getElementById(targetId).textContent;
+                copyText(text);
+            } else if (e.target.classList.contains('btn-go-sm')) {
+                var href = e.target.getAttribute('data-href');
+                if (href) { window.location.href = href; }
+            }
+        });
+
+        function copyText(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    App.showToast('已复制', 'success');
+                });
+            } else {
+                var input = document.createElement('input');
+                input.value = text;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                App.showToast('已复制', 'success');
+            }
+        }
+    })();
+    </script>
+</body>
+</html>

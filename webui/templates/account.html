@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号管理 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 返回首页</a>
+            <h1>账号管理</h1>
+        </header>
+        <div class="card-grid">
+            <div class="card card-change-pwd" onclick="handleChangePasswordClick()">
+                <div class="card-icon">&#128274;</div>
+                <div class="card-title">修改密码</div>
+                <div class="card-desc">Change Password</div>
+            </div>
+            <div class="card card-register" onclick="handleRegisterClick()">
+                <div class="card-icon">&#128100;</div>
+                <div class="card-title">注册账号</div>
+                <div class="card-desc">Account Register</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码弹窗 -->
+    <div class="modal-overlay" id="change-pwd-modal" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeChangePwdModal()">&times;</button>
+            <div class="modal-title">修改密码</div>
+            <div class="form-error" id="pwd-error"></div>
+            <div class="form-group">
+                <label for="chg-username">用户名</label>
+                <input type="text" class="form-control" id="chg-username" placeholder="请输入用户名" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="old-password">旧密码</label>
+                <div class="pwd-field">
+                    <input type="password" class="form-control" id="old-password" placeholder="请输入旧密码" autocomplete="current-password">
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('old-password')">&#128065;</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="new-password">新密码</label>
+                <div class="pwd-field">
+                    <input type="password" class="form-control" id="new-password" placeholder="请输入新密码（至少6位）" autocomplete="new-password">
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('new-password')">&#128065;</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">确认新密码</label>
+                <div class="pwd-field">
+                    <input type="password" class="form-control" id="confirm-password" placeholder="请再次输入新密码" autocomplete="new-password">
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('confirm-password')">&#128065;</button>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button class="btn btn-secondary" onclick="closeChangePwdModal()">取消</button>
+                <button class="btn btn-primary" id="change-pwd-btn" onclick="submitChangePassword()">确认修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/account.js"></script>
+</body>
+</html>

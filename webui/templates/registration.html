@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报名缴费 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>报名缴费</h1>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <!-- Step 1: Select class -->
+        <div class="section" id="step-select">
+            <div class="section-title">选择班级</div>
+            <div class="filter-bar">
+                <input type="text" class="form-control" id="class-keyword" placeholder="搜索班级名称">
+                <button class="btn btn-primary btn-sm" onclick="loadClasses()">搜索</button>
+            </div>
+            <div id="class-list"></div>
+        </div>
+
+        <!-- Step 2: Class detail & register form (hidden initially) -->
+        <div class="section" id="step-register" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <button class="btn btn-secondary btn-sm" onclick="backToClassList()">&larr; 返回班级列表</button>
+            </div>
+            <div class="section-title" id="selected-class-title">班级详情</div>
+            <div id="class-detail"></div>
+
+            <div class="section-title" style="margin-top:16px;">学生报名</div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <input type="hidden" id="reg-class-id">
+                <div class="form-group">
+                    <label>缴费方式</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="pay-type" value="scan" checked onchange="onPayTypeChange()"> 扫码支付（全额）</label>
+                        <label><input type="radio" name="pay-type" value="deposit" onchange="onPayTypeChange()"> 定金报名</label>
+                    </div>
+                    <div class="form-hint" id="pay-type-hint" style="margin-top:6px; color:#4a5568; font-size:0.85rem;"></div>
+                </div>
+                <div class="form-group">
+                    <label>报名方式</label>
+                    <select class="form-control" id="reg-price-id" onchange="onPriceChange()">
+                        <option value="">请选择报名方式</option>
+                    </select>
+                    <div class="form-hint" id="price-headcount-hint" style="display:none; margin-top:6px; color:#dd6b20; font-size:0.85rem;"></div>
+                </div>
+                <div class="form-group" id="deposit-amount-group" style="display:none;">
+                    <label>定金金额（元）</label>
+                    <input type="number" class="form-control" id="reg-deposit-amount" step="0.01" min="0" placeholder="请输入定金金额（可为0）">
+                </div>
+                <div class="form-group" id="period-group" style="display:none;">
+                    <label>上课起止日期</label>
+                    <div class="period-dates">
+                        <input type="date" id="reg-start-date" class="form-control" min="" max="">
+                        <span class="period-separator">~</span>
+                        <input type="date" id="reg-end-date" class="form-control" min="" max="">
+                    </div>
+                </div>
+                <div class="form-group" id="amount-group" style="display:none;">
+                    <label>实际金额（元）<span id="suggested-amount-hint" class="hint"></span></label>
+                    <input type="number" class="form-control" id="reg-actual-amount" step="0.01" min="0" placeholder="系统建议金额">
+                </div>
+                <div class="form-group">
+                    <label>学生列表 <span class="required">*</span></label>
+                    <div id="student-list"></div>
+                    <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="addStudentRow()" style="margin-top:8px;">+ 添加学生</button>
+                </div>
+                <div class="form-group">
+                    <label>负责教师 <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="reg-teacher-name" placeholder="请输入负责教师姓名" required>
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea class="form-control" id="reg-other-info" placeholder="可选，填写其他信息（适用于整批报名）"></textarea>
+                </div>
+                <div class="form-error" id="reg-error"></div>
+                <button type="submit" class="btn btn-primary btn-block" id="reg-btn">确认报名</button>
+            </form>
+        </div>
+
+        <!-- Headcount mismatch warning modal -->
+        <div class="modal-overlay" id="headcount-mismatch-modal" onclick="App.hideModal('headcount-mismatch-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+                <button class="modal-close" onclick="App.hideModal('headcount-mismatch-modal')">&times;</button>
+                <div class="modal-title">人数不匹配</div>
+                <div id="headcount-mismatch-msg" style="margin:16px 0; color:#dd6b20; font-size:0.95rem; line-height:1.6;"></div>
+                <button class="btn btn-primary" onclick="App.hideModal('headcount-mismatch-modal')">我知道了</button>
+            </div>
+        </div>
+
+        <!-- Amount confirmation modal -->
+        <div class="modal-overlay" id="amount-confirm-modal" onclick="App.hideModal('amount-confirm-modal')">
+            <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+                <button class="modal-close" onclick="App.hideModal('amount-confirm-modal')">&times;</button>
+                <div class="modal-title">确认金额</div>
+                <div style="margin:16px 0; font-size:1rem; line-height:1.6;">
+                    实际金额：<strong id="confirm-amount-text" style="color:#667eea; font-size:1.2rem;"></strong> 元
+                </div>
+                <div style="display:flex; gap:12px; justify-content:center;">
+                    <button class="btn btn-secondary" onclick="App.hideModal('amount-confirm-modal')">取消</button>
+                    <button class="btn btn-primary" id="amount-confirm-ok" onclick="confirmAmountAndProceed()">确认</button>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <!-- QR code modal for payment confirmation -->
+    <div class="modal-overlay" id="qrcode-modal" onclick="cancelPayment()">
+        <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+            <button class="modal-close" onclick="cancelPayment()">&times;</button>
+            <div class="modal-title">扫码付款</div>
+            <div id="payment-price-info" style="margin-bottom:12px; font-size:0.95rem; color:#4a5568;"></div>
+            <div id="payment-qrcode-list" class="qrcode-gallery" style="margin-bottom:16px;"></div>
+            <div id="qrcode-indicator" class="qrcode-indicator" style="display:none;"></div>
+            <div style="color:#e53e3e; font-size:0.85rem; margin-bottom:12px;">请扫码付款后，点击确认缴费完成报名</div>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button class="btn btn-secondary" onclick="cancelPayment()">取消</button>
+                <button class="btn btn-primary" id="confirm-pay-btn" onclick="confirmPayment()">确认缴费</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit payment modal -->
+    <div class="modal-overlay" id="deposit-modal" onclick="cancelDeposit()">
+        <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+            <button class="modal-close" onclick="cancelDeposit()">&times;</button>
+            <div class="modal-title">定金支付</div>
+            <div id="deposit-amount-info" style="margin-bottom:12px; font-size:0.95rem; color:#4a5568;"></div>
+            <div id="deposit-qrcode-list" class="qrcode-gallery" style="margin-bottom:16px;"></div>
+            <div id="deposit-qrcode-indicator" class="qrcode-indicator" style="display:none;"></div>
+            <div style="color:#4a5568; font-size:0.85rem; margin-bottom:12px;">请扫码或线下支付定金后，点击确认完成报名</div>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button class="btn btn-secondary" onclick="cancelDeposit()">取消</button>
+                <button class="btn btn-primary" id="confirm-deposit-btn" onclick="confirmDeposit()">确认定金报名</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/registration.js"></script>
+</body>
+</html>

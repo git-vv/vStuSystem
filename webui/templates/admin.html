@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级管理员 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>超级管理员</h1>
+            <div class="user-bar">
+                <span class="user-name" id="admin-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <!-- Registration requests section -->
+        <div class="section">
+            <div class="section-title">注册申请审批</div>
+            <div id="reg-req-list"></div>
+        </div>
+
+        <!-- Reset requests section -->
+        <div class="section">
+            <div class="section-title">密码重置申请</div>
+            <div id="reset-list"></div>
+        </div>
+
+        <!-- Users section -->
+        <div class="section">
+            <div class="section-title">用户管理</div>
+            <div id="user-list"></div>
+        </div>
+
+        <!-- Operation logs section -->
+        <div class="section">
+            <div class="section-title">操作日志</div>
+            <div class="filter-bar">
+                <select class="form-control" id="log-op-type" style="max-width:130px;">
+                    <option value="">全部类型</option>
+                    <option value="1">学生报名</option>
+                    <option value="2">分配资源</option>
+                    <option value="3">释放资源</option>
+                    <option value="4">重置密码</option>
+                    <option value="5">修改名额</option>
+                    <option value="6">创建班级</option>
+                    <option value="7">创建资源</option>
+                    <option value="8">修改资源</option>
+                    <option value="9">删除资源</option>
+                    <option value="10">审批重置</option>
+                    <option value="11">删除用户</option>
+                    <option value="12">修改学生</option>
+                    <option value="16">审批注册</option>
+                </select>
+                <input type="date" class="form-control" id="log-start" style="max-width:150px;">
+                <input type="date" class="form-control" id="log-end" style="max-width:150px;">
+                <button class="btn btn-primary btn-sm" onclick="loadLogs(1)">查询</button>
+                <button class="btn btn-danger btn-sm" onclick="cleanLogs()">清理</button>
+            </div>
+            <div class="filter-bar" style="margin-top:4px;">
+                <input type="text" class="form-control" id="log-class" placeholder="班级名称" style="max-width:120px;">
+                <input type="text" class="form-control" id="log-teacher" placeholder="教师名称" style="max-width:120px;">
+                <input type="text" class="form-control" id="log-student" placeholder="学生名称" style="max-width:120px;">
+                <input type="text" class="form-control" id="log-resource" placeholder="资源名称" style="max-width:120px;">
+            </div>
+            <div id="log-list"></div>
+            <div id="log-pagination"></div>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <!-- Approve reset modal -->
+    <div class="modal-overlay" id="approve-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="App.hideModal('approve-modal')">&times;</button>
+            <div class="modal-title">审批密码重置</div>
+            <form id="approve-form" onsubmit="handleApprove(event)">
+                <input type="hidden" id="approve-request-id">
+                <input type="hidden" id="approve-user-id">
+                <div class="form-group">
+                    <label>申请用户</label>
+                    <input type="text" class="form-control" id="approve-username" readonly>
+                </div>
+                <div class="form-group pwd-field">
+                    <label>新密码 <span class="required">*</span></label>
+                    <input type="password" class="form-control" id="approve-new-password" placeholder="请输入新密码（至少6位）" required>
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('approve-new-password')">&#128065;</button>
+                </div>
+                <div class="form-group pwd-field">
+                    <label>确认新密码 <span class="required">*</span></label>
+                    <input type="password" class="form-control" id="approve-new-password2" placeholder="请再次输入新密码" required>
+                    <button type="button" class="pwd-toggle" onclick="App.togglePassword('approve-new-password2')">&#128065;</button>
+                </div>
+                <div class="form-error" id="approve-error"></div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">确认审批</button>
+                    <button type="button" class="btn btn-secondary" onclick="App.hideModal('approve-modal')">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

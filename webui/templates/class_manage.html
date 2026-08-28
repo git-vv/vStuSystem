@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班级管理 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>班级管理</h1>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <!-- Class list -->
+        <div class="section" id="section-class-list">
+            <div class="section-title">班级列表</div>
+            <div class="filter-bar">
+                <select class="form-control" id="class-filter" style="max-width:120px;" onchange="loadClassList()">
+                    <option value="active">进行中</option>
+                    <option value="all">全部</option>
+                </select>
+                <input type="text" class="form-control" id="class-keyword" placeholder="搜索班级名称">
+                <button class="btn btn-primary btn-sm" onclick="loadClassList()">搜索</button>
+                <button class="btn btn-secondary btn-sm" onclick="showStudentQuery()">学生查询</button>
+            </div>
+            <div id="class-list"></div>
+        </div>
+
+        <!-- Student query section (hidden initially) -->
+        <div class="section" id="section-student-query" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <button class="btn btn-secondary btn-sm" onclick="backToClassList()">&larr; 返回班级列表</button>
+            </div>
+            <div class="section-title">学生查询</div>
+            <div class="filter-bar">
+                <label style="align-self:center; font-size:0.9rem;">查询类型:</label>
+                <select class="form-control" id="query-type" style="max-width:140px;" onchange="onQueryTypeChange()">
+                    <option value="registration">报名类型</option>
+                    <option value="allocation">资源分配类型</option>
+                    <option value="student_type">学生类型</option>
+                </select>
+                <label style="align-self:center; font-size:0.9rem;">开始日期:</label>
+                <input type="date" class="form-control" id="query-start-date" style="max-width:160px;">
+                <label style="align-self:center; font-size:0.9rem;">结束日期:</label>
+                <input type="date" class="form-control" id="query-end-date" style="max-width:160px;">
+                <button class="btn btn-primary btn-sm" onclick="loadStudentQuery()">查询</button>
+                <button class="btn btn-secondary btn-sm" onclick="printStudentQuery()">打印</button>
+            </div>
+            <div id="student-query-result"></div>
+            <div id="student-query-print-area" style="display:none;"></div>
+        </div>
+
+        <!-- Class detail (hidden initially) -->
+        <div class="section" id="section-class-detail" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <button class="btn btn-secondary btn-sm" onclick="backToClassList()">&larr; 返回班级列表</button>
+            </div>
+            <div class="section-title" id="detail-class-name">班级详情</div>
+            <div id="detail-info"></div>
+
+            <!-- Enrollment capacity edit (admin only) -->
+            <div id="enrollment-edit" style="display:none; margin-top:12px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>招生名额</label>
+                        <input type="number" class="form-control" id="edit-capacity" min="1">
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="updateEnrollment()" style="align-self:flex-end;">修改</button>
+                </div>
+            </div>
+
+            <!-- Edit prices button (admin only) -->
+            <div id="prices-edit-entry" style="display:none; margin-top:12px;">
+                <button class="btn btn-primary btn-sm" onclick="showPriceEditModal()">编辑价位</button>
+            </div>
+
+            <!-- Tabs for students/attendance/resource -->
+            <div class="tabs" style="margin-top:16px;">
+                <button class="tab-btn active" id="tab-students" onclick="switchManageTab('students')">学生列表</button>
+                <button class="tab-btn" id="tab-attendance" onclick="switchManageTab('attendance')">考勤</button>
+                <button class="tab-btn" id="tab-resource" onclick="switchManageTab('resource')">资源分配</button>
+            </div>
+
+            <!-- Students tab -->
+            <div class="tab-content active" id="content-students">
+                <div id="student-list"></div>
+            </div>
+
+            <!-- Attendance tab -->
+            <div class="tab-content" id="content-attendance">
+                <div class="filter-bar">
+                    <input type="date" class="form-control" id="attendance-date" style="max-width:160px;">
+                    <button class="btn btn-primary btn-sm" onclick="loadAttendance()">查询</button>
+                    <button class="btn btn-success btn-sm" onclick="submitAttendance()">提交今日考勤</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showAttendancePrint()">打印考勤表</button>
+                </div>
+                <div id="attendance-list"></div>
+                <div id="attendance-print-area" style="display:none;"></div>
+            </div>
+
+            <!-- Resource allocation tab -->
+            <div class="tab-content" id="content-resource">
+                <div class="section-title">分配资源</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>选择资源</label>
+                        <select class="form-control" id="alloc-resource-id"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>资源编号</label>
+                        <input type="number" class="form-control" id="alloc-resource-code" min="1" placeholder="编号">
+                    </div>
+                </div>
+                <div id="alloc-student-list"></div>
+                <div class="form-error" id="alloc-error"></div>
+                <button class="btn btn-success btn-block" onclick="allocateResource()" style="margin-top:8px;">确认分配</button>
+                <div style="margin-top:16px;">
+                    <div class="section-title">已分配列表</div>
+                    <div id="alloc-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <!-- Student detail modal -->
+    <div class="modal-overlay" id="student-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="App.hideModal('student-modal')">&times;</button>
+            <div class="modal-title">学生详情</div>
+            <div id="student-detail"></div>
+        </div>
+    </div>
+
+    <!-- Student edit modal -->
+    <div class="modal-overlay" id="student-edit-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="App.hideModal('student-edit-modal')">&times;</button>
+            <div class="modal-title">编辑学生</div>
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" class="form-control" id="edit-stu-name" maxlength="64">
+            </div>
+            <div class="form-group">
+                <label>性别</label>
+                <select class="form-control" id="edit-stu-gender">
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>家长电话</label>
+                <input type="tel" class="form-control" id="edit-stu-phone" maxlength="20">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>过敏</label>
+                    <select class="form-control" id="edit-stu-allergy" onchange="onAllergyChange()">
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                </div>
+                <div class="form-group" id="edit-stu-allergy-desc-wrap" style="display:none;">
+                    <label>过敏描述</label>
+                    <input type="text" class="form-control" id="edit-stu-allergy-desc" maxlength="256">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>所在班级</label>
+                <select class="form-control" id="edit-stu-class"></select>
+            </div>
+            <div class="form-group">
+                <label>备注</label>
+                <textarea class="form-control" id="edit-stu-other-info" maxlength="1024" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>负责教师</label>
+                <input type="text" class="form-control" id="edit-stu-teacher" maxlength="64">
+            </div>
+            <div class="form-group">
+                <label>报名价位</label>
+                <input type="text" class="form-control" id="edit-stu-price" readonly>
+            </div>
+            <div class="form-group">
+                <label>上课时段</label>
+                <div class="period-display">
+                    <input type="text" class="form-control" id="edit-stu-period" readonly>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-renew" style="display:none; margin-left:8px; white-space:nowrap;" onclick="openRenewModal()">续费</button>
+                </div>
+            </div>
+            <div class="form-group" id="supplement-group" style="display:none;">
+                <label>补缴转全额</label>
+                <select class="form-control" id="supplement-target-preset" onchange="onSupplementPresetChange()"></select>
+                <div id="supplement-hint" style="margin-top:6px; color:#3182ce; font-size:0.85rem;"></div>
+                <button type="button" class="btn btn-primary btn-block" style="margin-top:8px;" onclick="confirmSupplement()">确认补缴</button>
+            </div>
+            <input type="hidden" id="edit-stu-id">
+            <input type="hidden" id="supplement-reg-id">
+            <button class="btn btn-success btn-block" onclick="submitStudentEdit()">保存</button>
+        </div>
+    </div>
+
+    <!-- Price edit modal -->
+    <div class="modal-overlay" id="price-edit-modal" onclick="App.hideModal('price-edit-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="max-width:600px;">
+            <button class="modal-close" onclick="App.hideModal('price-edit-modal')">&times;</button>
+            <div class="modal-title">编辑班级价位</div>
+            <div style="font-size:0.85rem; color:#718096; margin-bottom:8px;">
+                已关联价位的预设不可更改；可编辑活动名称、删除已有价位或新增价位。
+            </div>
+            <div id="price-edit-list"></div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addPriceEditItem()" style="margin-top:8px;">+ 添加价位</button>
+            <div class="form-error" id="price-edit-error" style="margin-top:8px;"></div>
+            <button type="button" class="btn btn-success btn-block" onclick="submitPriceEdit()" style="margin-top:12px;">保存</button>
+        </div>
+    </div>
+
+    <!-- Time picker modal for early leave / late -->
+    <div class="modal-overlay" id="early-leave-modal" onclick="App.hideModal('early-leave-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="max-width:340px;">
+            <button class="modal-close" onclick="App.hideModal('early-leave-modal')">&times;</button>
+            <div class="modal-title" id="time-modal-title">选择早退时间</div>
+            <div id="early-leave-student-name" style="font-size:0.9rem; color:#4a5568; margin-bottom:12px;"></div>
+            <div class="form-row" style="gap:8px;">
+                <select class="form-control" id="early-leave-hour" style="max-width:90px;"></select>
+                <span style="align-self:center;">时</span>
+                <select class="form-control" id="early-leave-minute" style="max-width:90px;"></select>
+                <span style="align-self:center;">分</span>
+            </div>
+            <div class="form-row" style="margin-top:16px; gap:8px;">
+                <button type="button" class="btn btn-secondary" style="flex:1;" onclick="App.hideModal('early-leave-modal')">取消</button>
+                <button type="button" class="btn btn-success" style="flex:1;" onclick="confirmTimeModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refund modal (admin only) -->
+    <div class="modal-overlay" id="refund-modal" onclick="closeRefundModal()">
+        <div class="modal-content" onclick="event.stopPropagation();" style="max-width:380px;">
+            <button class="modal-close" onclick="closeRefundModal()">&times;</button>
+            <div class="modal-title">发起退费</div>
+            <div style="margin-bottom:12px;">
+                <div style="font-size:0.9rem; color:#4a5568; margin-bottom:4px;">学生姓名</div>
+                <div id="refund-stu-name" style="font-weight:700; font-size:1.05rem;"></div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <div style="font-size:0.9rem; color:#4a5568; margin-bottom:4px;">当前实缴金额</div>
+                <div id="refund-current-paid" style="font-weight:700; color:#38a169;"></div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-size:0.9rem; color:#4a5568; margin-bottom:4px;">退费金额（元）<span style="color:#e53e3e;">*</span></div>
+                <input type="number" class="form-control" id="refund-amount" step="0.01" min="0" placeholder="请输入退费金额">
+                <div style="font-size:0.8rem; color:#718096; margin-top:4px;">提示：输入 0 等同于取消</div>
+            </div>
+            <input type="hidden" id="refund-reg-id">
+            <div class="form-row" style="gap:8px;">
+                <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeRefundModal()">取消</button>
+                <button type="button" class="btn btn-warning" style="flex:1;" onclick="confirmRefund()">确认退费</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Renew modal -->
+    <div class="modal-overlay" id="renew-modal" onclick="App.hideModal('renew-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="max-width:420px;">
+            <button class="modal-close" onclick="App.hideModal('renew-modal')">&times;</button>
+            <div class="modal-title">续费延长上课时段</div>
+            <div class="form-group">
+                <label>当前时段</label>
+                <input type="text" class="form-control" id="renew-current-period" readonly>
+            </div>
+            <div class="form-group">
+                <label>续费时段</label>
+                <input type="text" class="form-control" id="renew-period-display" readonly>
+            </div>
+            <div class="form-group">
+                <label>新时段结束日期</label>
+                <input type="date" class="form-control" id="renew-new-end" min="" max="" onchange="updateRenewPeriodDisplay()">
+            </div>
+            <div class="form-group">
+                <label>续费金额（元）<span id="renew-suggested-hint" class="hint"></span></label>
+                <input type="number" class="form-control" id="renew-amount" step="0.01" min="0" placeholder="续费金额">
+            </div>
+            <input type="hidden" id="renew-reg-id">
+            <div class="form-error" id="renew-error"></div>
+            <div class="form-row" style="gap:8px; margin-top:12px;">
+                <button type="button" class="btn btn-secondary" style="flex:1;" onclick="App.hideModal('renew-modal')">取消</button>
+                <button type="button" class="btn btn-primary" style="flex:1;" onclick="confirmRenew()">确认续费</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Renew amount confirmation modal -->
+    <div class="modal-overlay" id="renew-confirm-modal" onclick="App.hideModal('renew-confirm-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center; max-width:380px;">
+            <button class="modal-close" onclick="App.hideModal('renew-confirm-modal')">&times;</button>
+            <div class="modal-title">确认续费</div>
+            <div style="margin:16px 0; font-size:1rem; line-height:1.6;">
+                续费金额：<strong id="renew-confirm-amount-text" style="color:#667eea; font-size:1.2rem;"></strong> 元
+            </div>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button class="btn btn-secondary" onclick="App.hideModal('renew-confirm-modal')">取消</button>
+                <button class="btn btn-primary" id="renew-confirm-ok" onclick="submitRenew()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/class_manage.js"></script>
+</body>
+</html>

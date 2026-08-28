@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>价位预设 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>价位预设</h1>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <!-- Add new preset -->
+        <div class="section">
+            <div class="section-title">新增预设</div>
+            <div class="preset-add-form">
+                <div class="form-row">
+                    <div class="form-group" style="flex:0 0 120px;">
+                        <label>金额（元） <span class="required">*</span></label>
+                        <input type="number" class="form-control" id="preset-amount" step="0.01" min="0" placeholder="如 500" oninput="onPresetAmountChange()">
+                    </div>
+                    <div class="form-group" style="flex:0 0 140px;">
+                        <label>同时报名人数 <span class="required">*</span></label>
+                        <input type="number" class="form-control" id="preset-headcount" step="1" min="1" value="1">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>二维码图片 <span style="color:#e53e3e;font-size:0.8rem;">（最多10张）</span></label>
+                        <input type="file" class="form-control" id="preset-qrcode-input" accept="image/*" multiple onchange="handlePresetQrcodeUpload()">
+                        <div class="price-qrcode-preview" id="preset-qrcode-preview"></div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success btn-sm" onclick="addPreset()">保存预设</button>
+            </div>
+        </div>
+
+        <!-- Existing presets -->
+        <div class="section">
+            <div class="section-title">已设价位</div>
+            <div class="preset-list-container">
+                <div id="preset-list"></div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <!-- Preset error modal -->
+    <div class="modal-overlay" id="preset-error-modal" onclick="closePresetErrorModal()">
+        <div class="modal-content" onclick="event.stopPropagation();" style="max-width:360px;">
+            <button class="modal-close" onclick="closePresetErrorModal()">&times;</button>
+            <div class="modal-title" id="preset-error-title">无法删除预设</div>
+            <div id="preset-error-msg" style="padding:16px 0; color:#4a5568; font-size:0.95rem; line-height:1.6;"></div>
+            <button type="button" class="btn btn-primary" onclick="closePresetErrorModal()" style="width:100%;">知道了</button>
+        </div>
+    </div>
+
+    <!-- Hidden file input for adding images to existing preset -->
+    <input type="file" class="form-control" id="preset-add-img-input" accept="image/*" multiple style="display:none;" onchange="handleAddPresetImgUpload()">
+
+    <!-- QR code modal -->
+    <div class="modal-overlay" id="qrcode-modal" onclick="App.hideModal('qrcode-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+            <button class="modal-close" onclick="App.hideModal('qrcode-modal')">&times;</button>
+            <div class="modal-title">二维码</div>
+            <img id="qrcode-img" class="qrcode-img" src="" alt="QR Code">
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/preset.js"></script>
+</body>
+</html>

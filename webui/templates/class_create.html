@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建班级 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link-top">&larr; 首页</a>
+            <h1>创建班级</h1>
+            <div class="user-bar">
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout" onclick="handleLogout()">退出</button>
+            </div>
+        </header>
+
+        <!-- Class type management -->
+        <div class="section">
+            <div class="section-title">班级类型管理</div>
+            <div class="form-row" style="margin-bottom:12px;">
+                <div class="form-group" style="flex:1;">
+                    <select class="form-control" id="new-type-name">
+                        <option value="">选择或输入新类型名称</option>
+                    </select>
+                    <input type="text" class="form-control" id="new-type-name-input" placeholder="或手动输入新类型名称" style="margin-top:8px;">
+                </div>
+                <button class="btn btn-success btn-sm" onclick="addClassType()" style="align-self:flex-end;">添加</button>
+            </div>
+            <div id="type-list"></div>
+        </div>
+
+        <!-- Create class form -->
+        <div class="section">
+            <div class="section-title">创建新班级</div>
+            <form id="create-form" onsubmit="handleCreateClass(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>开始日期 <span class="required">*</span></label>
+                        <input type="date" class="form-control" id="start-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期 <span class="required">*</span></label>
+                        <input type="date" class="form-control" id="end-time" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>班级类型 <span class="required">*</span></label>
+                        <select class="form-control" id="class-type" required>
+                            <option value="">请选择类型</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>招生名额 <span class="required">*</span></label>
+                        <input type="number" class="form-control" id="enrollment-capacity" min="1" value="30" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>班级描述</label>
+                    <textarea class="form-control" id="description" placeholder="可选，填写班级描述"></textarea>
+                </div>
+
+                <!-- Prices section -->
+                <div class="section-title" style="margin-top:16px;">价位设置</div>
+                <div id="price-list"></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addPriceItem()" style="margin-top:8px;">+ 添加价位</button>
+
+                <div class="form-error" id="create-error" style="margin-top:12px;"></div>
+                <button type="submit" class="btn btn-primary btn-block" id="create-btn" style="margin-top:12px;">创建班级</button>
+            </form>
+        </div>
+
+        <a href="/" class="back-link">&larr; 返回首页</a>
+    </div>
+
+    <!-- QR code modal -->
+    <div class="modal-overlay" id="qrcode-modal" onclick="App.hideModal('qrcode-modal')">
+        <div class="modal-content" onclick="event.stopPropagation();" style="text-align:center;">
+            <button class="modal-close" onclick="App.hideModal('qrcode-modal')">&times;</button>
+            <div class="modal-title">二维码</div>
+            <img id="qrcode-img" class="qrcode-img" src="" alt="QR Code">
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/class_create.js"></script>
+</body>
+</html>

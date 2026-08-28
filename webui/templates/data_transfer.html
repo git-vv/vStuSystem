@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理 - 星芽教务系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .dt-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .dt-section h2 {
+            font-size: 1.1rem;
+            margin: 0 0 8px 0;
+            color: #2d3748;
+        }
+        .dt-section p {
+            font-size: 0.9rem;
+            color: #718096;
+            margin: 0 0 16px 0;
+        }
+        .dt-danger {
+            border: 2px solid #fc8181;
+            background: #fff5f5;
+        }
+        .dt-danger h2 {
+            color: #c53030;
+        }
+        .dt-danger p {
+            color: #9b2c2c;
+        }
+        .dt-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .dt-file-input {
+            display: none;
+        }
+        .btn-danger {
+            background: #e53e3e;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-danger:hover {
+            background: #c53030;
+        }
+        .btn-danger:disabled {
+            background: #feb2b2;
+            cursor: not-allowed;
+        }
+        #result-section {
+            display: none;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        .result-table th, .result-table td {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .result-table th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+        .result-summary {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0fff4;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #276749;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <a href="/" style="color:#4a5568; text-decoration:none;">&larr; 首页</a>
+                <h1 style="margin:0; font-size:1.5rem;">数据管理</h1>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span id="user-display" style="color:#718096; font-size:0.9rem;"></span>
+                <button class="btn btn-secondary" onclick="handleLogout()" style="font-size:0.85rem;">退出</button>
+            </div>
+        </header>
+
+        <!-- Export Section -->
+        <div class="dt-section">
+            <h2>数据导出</h2>
+            <p>将当前系统的全部数据（数据库记录 + 上传图片）打包为 .dtz 文件下载。可用于数据备份或迁移到其他系统。</p>
+            <div class="dt-actions">
+                <button class="btn btn-primary" onclick="exportData()">下载全部数据</button>
+            </div>
+        </div>
+
+        <!-- Incremental Import Section -->
+        <div class="dt-section">
+            <h2>增量恢复</h2>
+            <p>上传 .dtz 文件，智能合并恢复数据。已存在的记录会被跳过，仅插入新数据。不会影响当前系统的已有数据。</p>
+            <div class="dt-actions">
+                <input type="file" id="incremental-file" class="dt-file-input" accept=".dtz" onchange="onFileSelected('incremental')">
+                <button class="btn btn-secondary" onclick="document.getElementById('incremental-file').click()">选择文件</button>
+                <button class="btn btn-primary" id="incremental-btn" onclick="importData('incremental')" disabled>增量恢复</button>
+                <span id="incremental-filename" style="color:#718096; font-size:0.85rem;"></span>
+            </div>
+        </div>
+
+        <!-- Overwrite Import Section -->
+        <div class="dt-section dt-danger">
+            <h2>完全覆盖</h2>
+            <p>警告：此操作将清空当前系统所有业务数据（保留用户账号），然后导入数据包中的全部数据。系统会先自动备份当前数据，但请务必确认操作无误。</p>
+            <div class="dt-actions">
+                <input type="file" id="overwrite-file" class="dt-file-input" accept=".dtz" onchange="onFileSelected('overwrite')">
+                <button class="btn-danger" onclick="document.getElementById('overwrite-file').click()">选择文件</button>
+                <button class="btn-danger" id="overwrite-btn" onclick="importData('overwrite')" disabled>完全覆盖</button>
+                <span id="overwrite-filename" style="color:#9b2c2c; font-size:0.85rem;"></span>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="dt-section" id="result-section">
+            <h2>导入结果</h2>
+            <div id="result-content"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/data_transfer.js"></script>
+</body>
+</html>
