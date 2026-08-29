@@ -43,4 +43,4 @@ data
 logs
 
 # pack
-packaging/output/*
+!packaging/output/*.exe

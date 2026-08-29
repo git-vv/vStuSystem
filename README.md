@@ -199,7 +199,7 @@ bin\Release\run_win_pack_tests.exe
 - `run_tests.exe` — 56 个既有测试用例
 - `run_win_pack_tests.exe` — Windows 平台特有的 12 个测试用例（覆盖配置文件自动生成、Crow 优雅退出、WinTray 纯逻辑）
 
-### 打包（仅 Windows）
+### 打包（Windows）
 
 #### 一键构建打包
 
@@ -254,6 +254,44 @@ vStuSystem-0.0.2-windows-x64-setup.exe /S /DESKTOP=1 /AUTOSTART=0
 #### SmartScreen 警告
 
 安装包未签名，首次运行时 Windows SmartScreen 会拦截。用户点击"更多信息" → "仍要运行"即可继续安装。长期方案需申请代码签名证书并签名安装包。
+
+### 打包（Linux）
+
+#### 先编译后打包
+
+```bash
+1. 编译
+cd vStuSystem
+mkdir build
+cd build 
+cmake .. && make -j4
+
+2. 打包
+cd vStuSystem/packaging/linux
+./package.sh
+
+3. 产物路径
+vStuSystem/packaging/output/ 目录下的tar包
+```
+
+#### 安装
+
+```bash
+1. 将tar包放到目标机器上，下面以0.0.2版本为例
+tar -zxf vStuSystem-0.0.2-linux-x86_64.tar.gz
+./vStuSystem-0.0.2-linux-x86_64/sbin/install.sh
+
+2. 安装完自动由systemctl接管并启动
+3. 停止、重启、启动命令
+停止：systemctl stop vStuSystem.service
+重启：systemctl restart vStuSystem.service
+启动：systemctl start vStuSystem.service
+
+4. 安装目录：
+/opt/vStuSystem
+```
+
+
 
 ## API 路由
 
