@@ -293,28 +293,9 @@ tar -zxf vStuSystem-0.0.2-linux-x86_64.tar.gz
 
 
 
-## API 路由
+-----
 
-| 方法   | 路径                     | 说明                  |
-| ---- | ---------------------- | ------------------- |
-| GET  | `/`                    | 主页                  |
-| GET  | `/registration`        | 报名缴费页面              |
-| GET  | `/class/create`        | 创建班级页面              |
-| GET  | `/class/manage`        | 班级管理页面              |
-| GET  | `/resource`            | 资源管理页面              |
-| POST | `/api/registration`    | 报名接口                |
-| POST | `/api/class/create`    | 创建班级接口              |
-| POST | `/api/class/manage`    | 班级管理接口              |
-| POST | `/api/resource`        | 资源管理接口              |
-| GET  | `/static/<dir>/<file>` | 静态资源（css/js/images） |
+### 下载安装包体验：https://github.com/git-vv/vStuSystem/releases/tag/release
 
-## 错误码
+### 如需定制功能，请联系15771679572（同微信）
 
-| 错误码  | 含义        |
-| ---- | --------- |
-| 0    | 成功（DB_OK） |
-| 1001 | 参数无效      |
-| 2001 | Dao 对象为空  |
-| 3001 | 数据库未打开    |
-| 3002 | SQL 预处理失败 |
-| 3003 | SQL 执行失败  |
